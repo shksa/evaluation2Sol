@@ -44,7 +44,7 @@ module.exports = [{
         });
         Promise.all(BooksTableInsertPromiseArray).then((BooksTableRecordsArray) => {
           Promise.all(LikesTableInsertPromiseArray).then((LikesTableRecordsArray) => {
-            reply([].concat(BooksTableRecordsArray, LikesTableRecordsArray));
+            reply({ books: BooksTableRecordsArray, likes: LikesTableRecordsArray });
             // reply('db populated');
           });
         });
