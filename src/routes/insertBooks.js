@@ -1,12 +1,11 @@
-// https://5gj1qvkc5h.execute-api.us-east-1.amazonaws.com/dev/allBooks
-// https://5gj1qvkc5h.execute-api.us-east-1.amazonaws.com/dev/findBookById/{id}
-
 const rp = require('request-promise');
+const Models = require('../../models');
 
 module.exports = [{
-  method: 'GET',
-  path: '/getBooks',
+  method: 'POST',
+  path: '/insertBooks',
   handler: (request, reply) => {
+    Models.Books.destroy({ truncate: true });
     const allBooksAPI = 'https://5gj1qvkc5h.execute-api.us-east-1.amazonaws.com/dev/allBooks';
     const allBooksPromise = rp(allBooksAPI);
     allBooksPromise.then((allBooks) => {
@@ -20,20 +19,25 @@ module.exports = [{
       });
       const allRatingsArrayPromise = Promise.all(promiseArray);
       const allBooksWithRatingsArray = [];
-      allRatingsArrayPromise.then((allRatingsStrArray) => {
-        const allRatingsArray = allRatingsStrArray.map(JSONstring => JSON.parse(JSONstring));
+      allRatingsArrayPromise.then((allRatingsInStrArray) => {
+        const allRatingsArray = allRatingsInStrArray.map(JSONstring => JSON.parse(JSONstring));
         for (let i = 0; i < allRatingsArray.length; i += 1) {
           const bookWithRating = { ...allBooksArray[i], ...allRatingsArray[i] };
           allBooksWithRatingsArray.push(bookWithRating);
         }
-        const allBooksWithRatingsGroupedByAuthor =
-        allBooksWithRatingsArray.reduce((accumulator, book) => {
-          const author = book.Author;
-          accumulator[author] = accumulator[author] || [];
-          accumulator[author].push(book);
-          return accumulator;
-        }, {});
-        reply(allBooksWithRatingsGroupedByAuthor);
+        const DBinsertPromiseArray = [];
+        allBooksWithRatingsArray.forEach((book) => {
+          const DBinsertPromise = Models.Books.create({
+            author: book.Author,
+            bookId: book.id,
+            name: book.Name,
+            rating: book.rating,
+          });
+          DBinsertPromiseArray.push(DBinsertPromise);
+        });
+        Promise.all(DBinsertPromiseArray).then((DBrecordArray) => {
+          reply(DBrecordArray);
+        });
       });
     });
   },
