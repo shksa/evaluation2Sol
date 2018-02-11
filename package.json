@@ -1,0 +1,23 @@
+{
+  "name": "evaluation-2-correct-code",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "test": "jest "
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "eslint": "^4.17.0",
+    "eslint-config-airbnb-base": "^12.1.0",
+    "eslint-plugin-import": "^2.8.0",
+    "jest": "^22.2.2"
+  },
+  "dependencies": {
+    "hapi": "^16.6.2",
+    "request": "^2.83.0",
+    "request-promise": "^4.2.2"
+  }
+}
