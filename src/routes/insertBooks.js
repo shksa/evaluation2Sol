@@ -6,6 +6,7 @@ module.exports = [{
   path: '/insertBooks',
   handler: (request, reply) => {
     Models.Books.destroy({ truncate: true });
+    Models.Likes.destroy({ truncate: true });
     const allBooksAPI = 'https://5gj1qvkc5h.execute-api.us-east-1.amazonaws.com/dev/allBooks';
     const allBooksPromise = rp(allBooksAPI);
     allBooksPromise.then((allBooks) => {
@@ -25,18 +26,27 @@ module.exports = [{
           const bookWithRating = { ...allBooksArray[i], ...allRatingsArray[i] };
           allBooksWithRatingsArray.push(bookWithRating);
         }
-        const DBinsertPromiseArray = [];
+        const BooksTableInsertPromiseArray = [];
+        const LikesTableInsertPromiseArray = [];
         allBooksWithRatingsArray.forEach((book) => {
-          const DBinsertPromise = Models.Books.create({
+          const BooksTableInsertPromise = Models.Books.create({
             author: book.Author,
             bookId: book.id,
             name: book.Name,
             rating: book.rating,
           });
-          DBinsertPromiseArray.push(DBinsertPromise);
+          const LikesTableInsertPromise = Models.Likes.create({
+            bookId: book.id,
+            likeState: 0,
+          });
+          BooksTableInsertPromiseArray.push(BooksTableInsertPromise);
+          LikesTableInsertPromiseArray.push(LikesTableInsertPromise);
         });
-        Promise.all(DBinsertPromiseArray).then((DBrecordArray) => {
-          reply(DBrecordArray);
+        Promise.all(BooksTableInsertPromiseArray).then((BooksTableRecordsArray) => {
+          Promise.all(LikesTableInsertPromiseArray).then((LikesTableRecordsArray) => {
+            reply([].concat(BooksTableRecordsArray, LikesTableRecordsArray));
+            // reply('db populated');
+          });
         });
       });
     });
