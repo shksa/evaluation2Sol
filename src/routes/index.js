@@ -1,5 +1,6 @@
-const getBooks = require('./getBooks');
+const getBooksFromAws = require('./getBooksFromAws');
 const insertBooks = require('./insertBooks');
 const likeBooks = require('./likeBooks');
+const getBooksFromDb = require('./getBooksFromDb');
 
-module.exports = [].concat(getBooks, insertBooks, likeBooks);
+module.exports = [].concat(getBooksFromDb, insertBooks, likeBooks, getBooksFromAws);

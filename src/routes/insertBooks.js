@@ -31,7 +31,12 @@ function handler(request, reply) {
   const allBooksAPI = 'https://5gj1qvkc5h.execute-api.us-east-1.amazonaws.com/dev/allBooks';
   const allBooksPromise = getPromiseResponseFrom(allBooksAPI);
   allBooksPromise.then((allBooks) => {
-    const allBooksArray = JSON.parse(allBooks).books;
+    let allBooksArray = JSON.parse(allBooks).books;
+    allBooksArray = allBooksArray.map(book => ({
+      author: book.Author,
+      bookId: book.id,
+      name: book.Name,
+    }));
     const allBooksWithRatingsPromise = getAllBooksWithRatings(allBooksArray);
     allBooksWithRatingsPromise.then((allBooksWithRatingsArray) => {
       Models.Books.destroy({ truncate: true }).then(() => {
