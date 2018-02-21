@@ -40,8 +40,15 @@ function handler(request, reply) {
     allBooksWithRatingsPromise.then((allBooksWithRatingsArray) => {
       Models.Books.destroy({ truncate: true }).then(() => {
         Models.Books.bulkCreate(allBooksWithRatingsArray)
-          .then((obj) => {
-            reply(obj).code(201);
+          .then(() => {
+            const allBooksWithRatingsGroupedByAuthor =
+            allBooksWithRatingsArray.reduce((accumulator, book) => {
+              const { author } = book;
+              accumulator[author] = accumulator[author] || [];
+              accumulator[author].push(book);
+              return accumulator;
+            }, {});
+            reply(allBooksWithRatingsGroupedByAuthor).code(200);
           });
       });
     });
@@ -50,7 +57,7 @@ function handler(request, reply) {
 
 module.exports = [{
   method: 'POST',
-  path: '/insertBooks',
+  path: '/insertAndGetBooks',
   handler,
 },
 ];
