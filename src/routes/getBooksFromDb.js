@@ -64,15 +64,33 @@ function handler(request, reply) {
         allBooksWithRatingsPromise.then((allBooksWithRatingsArray) => {
           Models.Books.destroy({ truncate: true }).then(() => {
             Models.Books.bulkCreate(allBooksWithRatingsArray)
-              .then((obj) => {
-                reply(obj).code(201);
+              .then(() => {
+                const allBooksWithRatingsGroupedByAuthor =
+                allBooksWithRatingsArray.reduce((accumulator, book) => {
+                  const author = book.author;
+                  accumulator[author] = accumulator[author] || [];
+                  accumulator[author].push(book);
+                  return accumulator;
+                }, {});
+                reply(allBooksWithRatingsGroupedByAuthor).code(200);
               });
           });
         });
       });
     } else {
       console.log('non-empty table, sending to frontend');
-      reply(booksTableRecordsArray);
+      const allBooksWithRatingsGroupedByAuthor =
+      booksTableRecordsArray.reduce((accumulator, book) => {
+        const {
+          author, bookId, name, rating,
+        } = book;
+        accumulator[author] = accumulator[author] || [];
+        accumulator[author].push({
+          author, bookId, name, rating,
+        });
+        return accumulator;
+      }, {});
+      reply(allBooksWithRatingsGroupedByAuthor).code(200);
     }
   });
 }
