@@ -3,7 +3,7 @@ const Models = require('../../models');
 function handler(request, reply) {
   Models.Books.findAll().then((booksTableRecordsArray) => {
     if (booksTableRecordsArray.length === 0) {
-      reply('books not found');
+      reply('no books found');
     } else {
       console.log('non-empty table, sending to frontend');
       const allBooksWithRatingsGroupedByAuthor =
